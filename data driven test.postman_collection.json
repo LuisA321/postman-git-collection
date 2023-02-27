@@ -1,0 +1,200 @@
+{
+	"info": {
+		"name": "data driven test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9084354"
+	},
+	"item": [
+		{
+			"name": "data driven with external files",
+			"item": [
+				{
+					"name": "Generate reference Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();\r",
+									"\r",
+									"\r",
+									"pm.test(\"Should contain reference id\", function () {\r",
+									"    pm.expect(response.uuid).to.exist;\r",
+									"});\r",
+									"\r",
+									"pm.globals.set(\"referenceId\", response.uuid);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "httpbin.org/uuid",
+							"host": [
+								"httpbin",
+								"org"
+							],
+							"path": [
+								"uuid"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create order Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();\r",
+									"\r",
+									"if(pm.variables.get(\"isValid\") == \"true\"){\r",
+									"    pm.test(\"Should cointain reference id\",()=>{\r",
+									"        pm.expect(response.json.referenceId).to.eql(pm.globals.get(\"referenceId\"));\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"Should contain customer id\",()=>{\r",
+									"        pm.expect(response.json.customerId).to.eql(pm.iterationData.get(\"customerId\"));\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"Should cointain product id\",()=>{\r",
+									"        pm.expect(response.json.productId).to.eql(pm.iterationData.get(\"productId\"));\r",
+									"    });\r",
+									"}else{\r",
+									"    pm.test(\"Should not to be valid\",()=>{\r",
+									"        pm.expect(response.json).to.be.null;\r",
+									"    });\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.variables.set(\"metaInfoBody\", JSON.stringify(pm.variables.get('metaInfo')));\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"referenceId\": \"{{referenceId}}\",\n    \"customerId\": {{customerId}},\n    \"productId\": {{productId}},\n    \"metaInfo\": {{metaInfoBody}}\n}"
+						},
+						"url": {
+							"raw": "httpbin.org/post",
+							"host": [
+								"httpbin",
+								"org"
+							],
+							"path": [
+								"post"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check status Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is \" + pm.iterationData.get('expectedStatus'), function () {\r",
+									"    pm.response.to.have.status(pm.iterationData.get('expectedStatus'));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "httpbin.org/status/{{status}}",
+							"host": [
+								"httpbin",
+								"org"
+							],
+							"path": [
+								"status",
+								"{{status}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "customerId",
+			"value": "100",
+			"type": "string"
+		},
+		{
+			"key": "productId",
+			"value": "200",
+			"type": "string"
+		},
+		{
+			"key": "isValid",
+			"value": "true",
+			"type": "string"
+		},
+		{
+			"key": "metaInfo",
+			"value": "{}",
+			"type": "string"
+		}
+	]
+}
